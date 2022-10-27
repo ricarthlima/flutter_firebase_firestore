@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "594525582620",
+    "project_id": "flutter-ff01-ahead",
+    "storage_bucket": "flutter-ff01-ahead.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:594525582620:android:591d88515aadad6e38f6d9",
+        "android_client_info": {
+          "package_name": "br.com.alura.flutter_firebase_firestore"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "594525582620-vte7hohkq6lt1abh43ohkn8u3smbv67a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlFwH68rzN_ACJ0nZCA8_SQMYhb-qyFoo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "594525582620-vte7hohkq6lt1abh43ohkn8u3smbv67a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
