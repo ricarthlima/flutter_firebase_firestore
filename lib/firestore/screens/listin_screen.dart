@@ -1,131 +1,51 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_firestore/firestore/data/listin.dart';
-import 'package:uuid/uuid.dart';
+import 'package:flutter_firebase_firestore/firestore/data/produto.dart';
+import 'package:flutter_firebase_firestore/firestore/screens/widgets/list_produto_pego.dart';
+import 'package:flutter_firebase_firestore/firestore/screens/widgets/list_produto_planejado.dart';
+import '../data/listin.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class ListinScreen extends StatefulWidget {
+  final Listin listin;
+  const ListinScreen({super.key, required this.listin});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<ListinScreen> createState() => _ListinScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  List<Listin> listListin = [
-    Listin(id: "UUID", name: "Lista de Outubro"),
+class _ListinScreenState extends State<ListinScreen> {
+  List<Produto> listaProdutosPlanejados = [
+    Produto(id: "ADASD", name: "Maçã"),
+    Produto(id: "UUID", name: "Pêra"),
+  ];
+  List<Produto> listaProdutosPegos = [
+    Produto(id: "UUID", name: "Laranja"),
   ];
 
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-  @override
-  void initState() {
-    refresh();
-    super.initState();
-  }
+  int currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Listas de Compras")),
-      body: RefreshIndicator(
-        onRefresh: () {
-          return refresh();
+      appBar: AppBar(title: Text(widget.listin.name)),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: (value) {
+          setState(() {
+            currentIndex = value;
+          });
         },
-        child: ListView(
-          children: List.generate(
-            listListin.length,
-            (index) {
-              Listin model = listListin[index];
-              return Dismissible(
-                key: ValueKey<Listin>(listListin[index]),
-                background: Container(
-                  alignment: Alignment.centerRight,
-                  color: Colors.red,
-                  child: const Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                  ),
-                ),
-                direction: DismissDirection.endToStart,
-                onDismissed: (DismissDirection direction) {
-                  remove(model);
-                },
-                child: ListTile(
-                  title: Text(model.name),
-                  subtitle: Text(model.id),
-                  onLongPress: () {
-                    showModalForm(context, toEdit: model);
-                  },
-                ),
-              );
-            },
-          ),
-        ),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Lista"),
+          BottomNavigationBarItem(icon: Icon(Icons.check), label: "Pegos"),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalForm(context);
-        },
-        child: const Icon(Icons.add),
+      body: IndexedStack(
+        index: currentIndex,
+        children: [
+          ListProdutoPlanejadoWidget(list: listaProdutosPlanejados),
+          ListProdutoPegoWidget(list: listaProdutosPegos),
+        ],
       ),
     );
-  }
-
-  showModalForm(BuildContext context, {Listin? toEdit}) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        TextEditingController _nameController = TextEditingController();
-        String id = const Uuid().v1();
-
-        if (toEdit != null) {
-          _nameController.text = toEdit.name;
-          id = toEdit.id;
-        }
-
-        return AlertDialog(
-          title:
-              Text((toEdit == null) ? "Nova Lista" : "Editar '${toEdit.name}'"),
-          content: TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              label: Text("Nome"),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Listin listin = Listin(id: id, name: _nameController.text);
-                firestore.collection("listins").doc(id).set(listin.toMap());
-                refresh();
-                Navigator.pop(context);
-              },
-              child: Text((toEdit == null) ? "Adicionar" : "Editar"),
-            )
-          ],
-        );
-      },
-    );
-  }
-
-  refresh() async {
-    List<Listin> listTemp = [];
-
-    QuerySnapshot<Map<String, dynamic>> snapshot =
-        await firestore.collection("listins").get();
-    for (var doc in snapshot.docs) {
-      listTemp.add(Listin.fromMap(doc.data()));
-    }
-
-    setState(() {
-      listListin = listTemp;
-    });
-
-    return true;
-  }
-
-  remove(Listin listin) async {
-    await firestore.collection("listins").doc(listin.id).delete();
-    refresh();
   }
 }
