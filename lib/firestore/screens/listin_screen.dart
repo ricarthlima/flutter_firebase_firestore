@@ -29,8 +29,28 @@ class _ListinScreenState extends State<ListinScreen> {
 
   @override
   void initState() {
-    refresh();
+    setupListeners();
     super.initState();
+  }
+
+  setupListeners() {
+    firestore
+        .collection(FirestoreKeys.listins)
+        .doc(widget.listin.id)
+        .collection(FirestoreKeys.listaProdutosPlanejados)
+        .snapshots()
+        .listen((snapshotPlanejados) {
+      refresh(snapshotPlanejados: snapshotPlanejados);
+    });
+
+    firestore
+        .collection(FirestoreKeys.listins)
+        .doc(widget.listin.id)
+        .collection(FirestoreKeys.listaProdutosPegos)
+        .snapshots()
+        .listen((snapshotPegos) {
+      refresh(snapshotPegos: snapshotPegos);
+    });
   }
 
   @override
@@ -143,7 +163,6 @@ class _ListinScreenState extends State<ListinScreen> {
                     .collection(keySender!)
                     .doc(id)
                     .set(produto.toMap());
-                refresh();
                 Navigator.pop(context);
               },
               child: Text((toEdit == null) ? "Adicionar" : "Editar"),
@@ -154,22 +173,25 @@ class _ListinScreenState extends State<ListinScreen> {
     );
   }
 
-  refresh() async {
-    QuerySnapshot<Map<String, dynamic>> snapshotPlanejados = await firestore
+  refresh({
+    QuerySnapshot<Map<String, dynamic>>? snapshotPlanejados,
+    QuerySnapshot<Map<String, dynamic>>? snapshotPegos,
+  }) async {
+    snapshotPlanejados ??= await firestore
         .collection(FirestoreKeys.listins)
         .doc(widget.listin.id)
         .collection(FirestoreKeys.listaProdutosPlanejados)
         .get();
 
-    QuerySnapshot<Map<String, dynamic>> snapshotPegos = await firestore
+    snapshotPegos ??= await firestore
         .collection(FirestoreKeys.listins)
         .doc(widget.listin.id)
         .collection(FirestoreKeys.listaProdutosPegos)
         .get();
 
     setState(() {
-      listaProdutosPlanejados = _fillList(snapshotPlanejados);
-      listaProdutosPegos = _fillList(snapshotPegos);
+      listaProdutosPlanejados = _fillList(snapshotPlanejados!);
+      listaProdutosPegos = _fillList(snapshotPegos!);
     });
 
     return true;
@@ -192,7 +214,6 @@ class _ListinScreenState extends State<ListinScreen> {
         .collection(listCollection)
         .doc(toRemove.id)
         .delete();
-    refresh();
   }
 
   swapList(
@@ -210,7 +231,5 @@ class _ListinScreenState extends State<ListinScreen> {
         .collection(listReceiver)
         .doc(produto.id)
         .set(produto.toMap());
-
-    refresh();
   }
 }

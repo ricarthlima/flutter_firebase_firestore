@@ -21,8 +21,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    refresh();
+    setupListners();
     super.initState();
+  }
+
+  setupListners() {
+    firestore.collection(FirestoreKeys.listins).snapshots().listen((snapshot) {
+      refresh(snapshot: snapshot);
+    });
   }
 
   @override
@@ -108,7 +114,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     .collection(FirestoreKeys.listins)
                     .doc(id)
                     .set(listin.toMap());
-                refresh();
                 Navigator.pop(context);
               },
               child: Text((toEdit == null) ? "Adicionar" : "Editar"),
@@ -119,11 +124,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  refresh() async {
+  refresh({QuerySnapshot<Map<String, dynamic>>? snapshot}) async {
+    snapshot ??= await firestore.collection(FirestoreKeys.listins).get();
+
     List<Listin> listTemp = [];
 
-    QuerySnapshot<Map<String, dynamic>> snapshot =
-        await firestore.collection(FirestoreKeys.listins).get();
     for (var doc in snapshot.docs) {
       listTemp.add(Listin.fromMap(doc.data()));
     }
@@ -137,6 +142,5 @@ class _HomeScreenState extends State<HomeScreen> {
 
   remove(Listin listin) async {
     await firestore.collection(FirestoreKeys.listins).doc(listin.id).delete();
-    refresh();
   }
 }
