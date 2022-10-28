@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_firestore/firestore/commom/firestore_keys.dart';
 import 'package:flutter_firebase_firestore/firestore/data/produto.dart';
-import 'package:flutter_firebase_firestore/firestore/screens/widgets/list_produto_pego.dart';
 import 'package:flutter_firebase_firestore/firestore/screens/widgets/list_produto_planejado.dart';
 import 'package:uuid/uuid.dart';
 import '../data/listin.dart';
@@ -57,13 +56,20 @@ class _ListinScreenState extends State<ListinScreen> {
         child: IndexedStack(
           index: currentIndex,
           children: [
-            ListProdutoPlanejadoWidget(
+            ListProdutoWidget(
               list: listaProdutosPlanejados,
               onEdit: showModalForm,
               onDelete: remove,
               onSwap: swapList,
+              isPego: false,
             ),
-            ListProdutoPegoWidget(list: listaProdutosPegos),
+            ListProdutoWidget(
+              list: listaProdutosPegos,
+              onEdit: showModalForm,
+              onDelete: remove,
+              onSwap: swapList,
+              isPego: true,
+            ),
           ],
         ),
       ),
@@ -76,7 +82,7 @@ class _ListinScreenState extends State<ListinScreen> {
     );
   }
 
-  showModalForm(BuildContext context, {Produto? toEdit}) {
+  showModalForm(BuildContext context, {Produto? toEdit, String? keySender}) {
     showDialog(
       context: context,
       builder: (context) {
@@ -93,6 +99,8 @@ class _ListinScreenState extends State<ListinScreen> {
             _priceController.text = toEdit.price.toString();
           }
         }
+
+        keySender ??= FirestoreKeys.listaProdutosPlanejados;
 
         return AlertDialog(
           title: Text(
@@ -132,7 +140,7 @@ class _ListinScreenState extends State<ListinScreen> {
                 firestore
                     .collection(FirestoreKeys.listins)
                     .doc(widget.listin.id)
-                    .collection(FirestoreKeys.listaProdutosPlanejados)
+                    .collection(keySender!)
                     .doc(id)
                     .set(produto.toMap());
                 refresh();
