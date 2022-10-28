@@ -21,16 +21,21 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Listas de Compras")),
-      body: ListView(
-        children: List.generate(
-          listListin.length,
-          (index) {
-            Listin model = listListin[index];
-            return ListTile(
-              title: Text(model.name),
-              subtitle: Text(model.id),
-            );
-          },
+      body: RefreshIndicator(
+        onRefresh: () {
+          return refresh();
+        },
+        child: ListView(
+          children: List.generate(
+            listListin.length,
+            (index) {
+              Listin model = listListin[index];
+              return ListTile(
+                title: Text(model.name),
+                subtitle: Text(model.id),
+              );
+            },
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -71,5 +76,21 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
+  }
+
+  refresh() async {
+    List<Listin> listTemp = [];
+
+    QuerySnapshot<Map<String, dynamic>> snapshot =
+        await firestore.collection("listins").get();
+    for (var doc in snapshot.docs) {
+      listTemp.add(Listin.fromMap(doc.data()));
+    }
+
+    setState(() {
+      listListin = listTemp;
+    });
+
+    return true;
   }
 }
