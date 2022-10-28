@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_firestore/firestore/commom/firestore_keys.dart';
 import 'package:flutter_firebase_firestore/firestore/data/produto.dart';
 import 'package:flutter_firebase_firestore/firestore/screens/widgets/list_produto_pego.dart';
 import 'package:flutter_firebase_firestore/firestore/screens/widgets/list_produto_planejado.dart';
+import 'package:uuid/uuid.dart';
 import '../data/listin.dart';
 
 class ListinScreen extends StatefulWidget {
@@ -14,14 +17,16 @@ class ListinScreen extends StatefulWidget {
 
 class _ListinScreenState extends State<ListinScreen> {
   List<Produto> listaProdutosPlanejados = [
-    Produto(id: "ADASD", name: "Maçã"),
-    Produto(id: "UUID", name: "Pêra"),
+    Produto(id: "ADASD", name: "Maçã", amount: 2),
+    Produto(id: "UUID", name: "Pêra", amount: 3),
   ];
   List<Produto> listaProdutosPegos = [
-    Produto(id: "UUID", name: "Laranja"),
+    Produto(id: "UUID", name: "Laranja", amount: 1),
   ];
 
   int currentIndex = 0;
+
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +51,80 @@ class _ListinScreenState extends State<ListinScreen> {
           ListProdutoPegoWidget(list: listaProdutosPegos),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalForm(context);
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
+
+  showModalForm(BuildContext context, {Listin? toEdit}) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        TextEditingController _nameController = TextEditingController();
+        TextEditingController _amountController = TextEditingController();
+        TextEditingController _priceController = TextEditingController();
+        String id = const Uuid().v1();
+
+        if (toEdit != null) {
+          _nameController.text = toEdit.name;
+          id = toEdit.id;
+        }
+
+        return AlertDialog(
+          title: Text(
+              (toEdit == null) ? "Novo Produto" : "Editar '${toEdit.name}'"),
+          content: Column(
+            children: [
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  label: Text("Nome"),
+                ),
+              ),
+              TextField(
+                controller: _amountController,
+                decoration: const InputDecoration(
+                  label: Text("Quantidade"),
+                ),
+              ),
+              TextField(
+                controller: _priceController,
+                decoration: const InputDecoration(
+                  label: Text("Preço"),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Produto produto = Produto(
+                    id: id,
+                    name: _nameController.text,
+                    amount: double.parse(_amountController.text));
+                if (_priceController.text != "") {
+                  produto.price = double.parse(_priceController.text);
+                }
+                firestore
+                    .collection(FirestoreKeys.listins)
+                    .doc(widget.listin.id)
+                    .collection(FirestoreKeys.listaProdutosPlanejados)
+                    .doc(id)
+                    .set(produto.toMap());
+                refresh();
+                Navigator.pop(context);
+              },
+              child: Text((toEdit == null) ? "Adicionar" : "Editar"),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  refresh() {}
 }

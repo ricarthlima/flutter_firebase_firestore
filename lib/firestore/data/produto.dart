@@ -2,13 +2,13 @@ class Produto {
   String id;
   String name;
   double? price;
-  double? amount;
+  double amount;
 
   Produto({
     required this.id,
     required this.name,
     this.price,
-    this.amount,
+    required this.amount,
   });
 
   Produto.fromMap(Map<String, dynamic> map)

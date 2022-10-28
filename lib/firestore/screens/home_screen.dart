@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_firestore/firestore/commom/firestore_keys.dart';
 import 'package:flutter_firebase_firestore/firestore/data/listin.dart';
 import 'package:flutter_firebase_firestore/firestore/screens/listin_screen.dart';
 import 'package:uuid/uuid.dart';
@@ -103,7 +104,10 @@ class _HomeScreenState extends State<HomeScreen> {
             TextButton(
               onPressed: () {
                 Listin listin = Listin(id: id, name: _nameController.text);
-                firestore.collection("listins").doc(id).set(listin.toMap());
+                firestore
+                    .collection(FirestoreKeys.listins)
+                    .doc(id)
+                    .set(listin.toMap());
                 refresh();
                 Navigator.pop(context);
               },
@@ -119,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
     List<Listin> listTemp = [];
 
     QuerySnapshot<Map<String, dynamic>> snapshot =
-        await firestore.collection("listins").get();
+        await firestore.collection(FirestoreKeys.listins).get();
     for (var doc in snapshot.docs) {
       listTemp.add(Listin.fromMap(doc.data()));
     }
@@ -132,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   remove(Listin listin) async {
-    await firestore.collection("listins").doc(listin.id).delete();
+    await firestore.collection(FirestoreKeys.listins).doc(listin.id).delete();
     refresh();
   }
 }
