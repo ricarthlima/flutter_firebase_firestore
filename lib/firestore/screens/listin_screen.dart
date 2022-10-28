@@ -39,6 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
               return ListTile(
                 title: Text(model.name),
                 subtitle: Text(model.id),
+                onLongPress: () {
+                  showModalForm(context, toEdit: model);
+                },
               );
             },
           ),
@@ -53,15 +56,21 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  showModalForm(BuildContext context) {
+  showModalForm(BuildContext context, {Listin? toEdit}) {
     showDialog(
       context: context,
       builder: (context) {
         TextEditingController _nameController = TextEditingController();
         String id = const Uuid().v1();
 
+        if (toEdit != null) {
+          _nameController.text = toEdit.name;
+          id = toEdit.id;
+        }
+
         return AlertDialog(
-          title: const Text("Nova Lista"),
+          title:
+              Text((toEdit == null) ? "Nova Lista" : "Editar '${toEdit.name}'"),
           content: TextField(
             controller: _nameController,
             decoration: const InputDecoration(
@@ -76,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 refresh();
                 Navigator.pop(context);
               },
-              child: const Text("Adicionar"),
+              child: Text((toEdit == null) ? "Adicionar" : "Editar"),
             )
           ],
         );
