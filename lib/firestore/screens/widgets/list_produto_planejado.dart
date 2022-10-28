@@ -3,7 +3,9 @@ import '../../data/produto.dart';
 
 class ListProdutoPlanejadoWidget extends StatelessWidget {
   final List<Produto> list;
-  const ListProdutoPlanejadoWidget({super.key, required this.list});
+  final Function onEdit;
+  const ListProdutoPlanejadoWidget(
+      {super.key, required this.list, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -12,6 +14,9 @@ class ListProdutoPlanejadoWidget extends StatelessWidget {
         Produto produto = list[index];
         return ListTile(
           title: Text(produto.name),
+          onLongPress: () {
+            onEdit(context, toEdit: produto);
+          },
         );
       }),
     );

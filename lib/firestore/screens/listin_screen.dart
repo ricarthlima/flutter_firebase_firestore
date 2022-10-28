@@ -51,7 +51,10 @@ class _ListinScreenState extends State<ListinScreen> {
         child: IndexedStack(
           index: currentIndex,
           children: [
-            ListProdutoPlanejadoWidget(list: listaProdutosPlanejados),
+            ListProdutoPlanejadoWidget(
+              list: listaProdutosPlanejados,
+              onEdit: showModalForm,
+            ),
             ListProdutoPegoWidget(list: listaProdutosPegos),
           ],
         ),
@@ -65,7 +68,7 @@ class _ListinScreenState extends State<ListinScreen> {
     );
   }
 
-  showModalForm(BuildContext context, {Listin? toEdit}) {
+  showModalForm(BuildContext context, {Produto? toEdit}) {
     showDialog(
       context: context,
       builder: (context) {
@@ -75,8 +78,12 @@ class _ListinScreenState extends State<ListinScreen> {
         String id = const Uuid().v1();
 
         if (toEdit != null) {
-          _nameController.text = toEdit.name;
           id = toEdit.id;
+          _nameController.text = toEdit.name;
+          _amountController.text = toEdit.amount.toString();
+          if (toEdit.price != null) {
+            _priceController.text = toEdit.price.toString();
+          }
         }
 
         return AlertDialog(
