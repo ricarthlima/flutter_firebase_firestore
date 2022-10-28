@@ -18,6 +18,12 @@ class _HomeScreenState extends State<HomeScreen> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
+  void initState() {
+    refresh();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Listas de Compras")),
@@ -67,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 Listin listin = Listin(id: id, name: _nameController.text);
                 firestore.collection("listins").doc(id).set(listin.toMap());
-
+                refresh();
                 Navigator.pop(context);
               },
               child: const Text("Adicionar"),
