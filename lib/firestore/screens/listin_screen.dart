@@ -29,6 +29,12 @@ class _ListinScreenState extends State<ListinScreen> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
+  void initState() {
+    refresh();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.listin.name)),
@@ -55,6 +61,7 @@ class _ListinScreenState extends State<ListinScreen> {
               list: listaProdutosPlanejados,
               onEdit: showModalForm,
               onDelete: remove,
+              onSwap: swapList,
             ),
             ListProdutoPegoWidget(list: listaProdutosPegos),
           ],
@@ -177,6 +184,25 @@ class _ListinScreenState extends State<ListinScreen> {
         .collection(listCollection)
         .doc(toRemove.id)
         .delete();
+    refresh();
+  }
+
+  swapList(
+    Produto produto,
+    String listSender,
+    String listReceiver,
+  ) {
+    // Remover da lista antiga
+    remove(produto, listSender);
+
+    // Adicionar na nova lista
+    firestore
+        .collection(FirestoreKeys.listins)
+        .doc(widget.listin.id)
+        .collection(listReceiver)
+        .doc(produto.id)
+        .set(produto.toMap());
+
     refresh();
   }
 }

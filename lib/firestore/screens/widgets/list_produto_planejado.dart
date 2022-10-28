@@ -6,11 +6,14 @@ class ListProdutoPlanejadoWidget extends StatelessWidget {
   final List<Produto> list;
   final Function onEdit;
   final Function onDelete;
+  final Function onSwap;
+
   const ListProdutoPlanejadoWidget({
     super.key,
     required this.list,
     required this.onEdit,
     required this.onDelete,
+    required this.onSwap,
   });
 
   @override
@@ -37,6 +40,19 @@ class ListProdutoPlanejadoWidget extends StatelessWidget {
             onLongPress: () {
               onEdit(context, toEdit: produto);
             },
+            trailing: IconButton(
+              icon: const Icon(
+                Icons.check,
+                color: Colors.green,
+              ),
+              onPressed: () {
+                onSwap(
+                  produto,
+                  FirestoreKeys.listaProdutosPlanejados,
+                  FirestoreKeys.listaProdutosPegos,
+                );
+              },
+            ),
           ),
         );
       }),
