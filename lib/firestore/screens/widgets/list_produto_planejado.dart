@@ -40,7 +40,7 @@ class ListProdutoPlanejadoWidget extends StatelessWidget {
             onLongPress: () {
               onEdit(context, toEdit: produto);
             },
-            trailing: IconButton(
+            leading: IconButton(
               icon: const Icon(
                 Icons.check,
                 color: Colors.green,
