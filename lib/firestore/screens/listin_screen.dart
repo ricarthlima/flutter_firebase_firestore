@@ -54,6 +54,7 @@ class _ListinScreenState extends State<ListinScreen> {
             ListProdutoPlanejadoWidget(
               list: listaProdutosPlanejados,
               onEdit: showModalForm,
+              onDelete: remove,
             ),
             ListProdutoPegoWidget(list: listaProdutosPegos),
           ],
@@ -167,5 +168,15 @@ class _ListinScreenState extends State<ListinScreen> {
     }
 
     return listTemp;
+  }
+
+  remove(Produto toRemove, String listCollection) async {
+    await firestore
+        .collection(FirestoreKeys.listins)
+        .doc(widget.listin.id)
+        .collection(listCollection)
+        .doc(toRemove.id)
+        .delete();
+    refresh();
   }
 }
