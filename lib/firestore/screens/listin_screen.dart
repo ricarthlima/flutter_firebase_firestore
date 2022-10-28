@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_firestore/firestore/data/listin.dart';
+import 'package:uuid/uuid.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,6 +14,8 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Listin> listListin = [
     Listin(id: "UUID", name: "Lista de Outubro"),
   ];
+
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -42,16 +46,25 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) {
+        TextEditingController _nameController = TextEditingController();
+        String id = const Uuid().v1();
+
         return AlertDialog(
           title: const Text("Nova Lista"),
-          content: const TextField(
-            decoration: InputDecoration(
+          content: TextField(
+            controller: _nameController,
+            decoration: const InputDecoration(
               label: Text("Nome"),
             ),
           ),
           actions: [
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Listin listin = Listin(id: id, name: _nameController.text);
+                firestore.collection("listins").doc(id).set(listin.toMap());
+
+                Navigator.pop(context);
+              },
               child: const Text("Adicionar"),
             )
           ],
