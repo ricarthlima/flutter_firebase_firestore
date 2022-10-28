@@ -44,12 +44,17 @@ class _ListinScreenState extends State<ListinScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.check), label: "Pegos"),
         ],
       ),
-      body: IndexedStack(
-        index: currentIndex,
-        children: [
-          ListProdutoPlanejadoWidget(list: listaProdutosPlanejados),
-          ListProdutoPegoWidget(list: listaProdutosPegos),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () {
+          return refresh();
+        },
+        child: IndexedStack(
+          index: currentIndex,
+          children: [
+            ListProdutoPlanejadoWidget(list: listaProdutosPlanejados),
+            ListProdutoPegoWidget(list: listaProdutosPegos),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -126,5 +131,34 @@ class _ListinScreenState extends State<ListinScreen> {
     );
   }
 
-  refresh() {}
+  refresh() async {
+    QuerySnapshot<Map<String, dynamic>> snapshotPlanejados = await firestore
+        .collection(FirestoreKeys.listins)
+        .doc(widget.listin.id)
+        .collection(FirestoreKeys.listaProdutosPlanejados)
+        .get();
+
+    QuerySnapshot<Map<String, dynamic>> snapshotPegos = await firestore
+        .collection(FirestoreKeys.listins)
+        .doc(widget.listin.id)
+        .collection(FirestoreKeys.listaProdutosPegos)
+        .get();
+
+    setState(() {
+      listaProdutosPlanejados = _fillList(snapshotPlanejados);
+      listaProdutosPegos = _fillList(snapshotPegos);
+    });
+
+    return true;
+  }
+
+  List<Produto> _fillList(QuerySnapshot<Map<String, dynamic>> snapshot) {
+    List<Produto> listTemp = [];
+
+    for (var doc in snapshot.docs) {
+      listTemp.add(Produto.fromMap(doc.data()));
+    }
+
+    return listTemp;
+  }
 }
